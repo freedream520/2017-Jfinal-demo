@@ -1,0 +1,40 @@
+Interceptors是jfinal  aop的实现方式，通过实现Interceptor接口以及使用@Before可以
+精确进行配置，
+Interceptor接口仅仅定了一个方法void intercept(ActionInvocation ai);
+我们可以让一个类实现这个接口，重写方法，如：
+public class DemoInterceptor implements Interceptor {
+public void intercept(ActionInvocation ai) {
+System.out.println("Before action invoking");
+ai.invoke();
+System.out.println("After action invoking");
+}
+}
+就写好了一个拦截器。
+拦截器配置有三个级别，global级，controller级，action级。global级的拦截器将对所有的
+action进行拦截，controller级拦截器将对该controller中的所以action拦截，action级拦截器
+只对该action进行拦截。
+global级拦截器在
+public void configInterceptor(Interceptors me) {
+        me.add(new DemoInterceptor());            
+}
+中配置，controller级拦截器使用@Before放在controller类定以前进行配置，action级拦截器
+使用@Before放在action定义前进行配置。具体配置如下：
+@Before(DemoInterceptor.class) // 配置一个Controller级别的拦截器
+public class HelloController extends Controller {
+@Before(AaaInterceptor.class)
+public void index() {
+renderText("配置一个action级别的拦截器");
+}
+@Before({AaaInterceptor.class, BbbInterceptor.class})
+public void test() {
+renderText("配置多个action级别的拦截器");
+}
+@ClearInterceptor
+public void login() {
+renderText("清除上一级别(Controller级)的拦截器");
+}
+@ClearInterceptor(ClearLayer.ALL)
+public void clearAllLayers() {
+renderText("清除所有级别(Global级与Controller级)的拦截器");
+}
+}
